@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="336" height="404" viewBox="0 0 336 404">
+  <rect width="336" height="404" fill="#e9e8e0"/>
+  <circle cx="168" cy="150" r="62" fill="#c6c4b6"/>
+  <path d="M58 404c0-74 49-120 110-120s110 46 110 120z" fill="#c6c4b6"/>
+  <text x="168" y="378" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#8b897c" text-anchor="middle">Headshot goes here</text>
+</svg>

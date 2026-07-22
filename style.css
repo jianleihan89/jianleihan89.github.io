@@ -1,0 +1,159 @@
+/* JianleiHan.com — shared stylesheet */
+
+:root {
+  --ink: #23211c;
+  --ink-soft: #6b665c;
+  --paper: #fbfaf6;
+  --paper-deep: #efeee7;
+  --accent: #2e4d6b;
+  --accent-deep: #223a52;
+  --rule: #e3e0d6;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 17px; }
+@media (max-width: 600px) { html { font-size: 16px; } }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  line-height: 1.68;
+}
+
+.wrap { max-width: 46rem; margin: 0 auto; padding: 0 1.4rem; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+::selection { background: #d9e2ec; }
+
+/* Header */
+.site-header { border-bottom: 1px solid var(--rule); }
+.header-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .6rem 1.4rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.3rem;
+}
+.wordmark {
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: .02em;
+  color: var(--ink);
+}
+.wordmark:hover { text-decoration: none; color: var(--accent); }
+.site-header nav {
+  display: flex;
+  gap: 1.15rem;
+  font-family: var(--sans);
+  font-size: .8rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.site-header nav a { color: var(--ink-soft); }
+.site-header nav a:hover { color: var(--accent); text-decoration: none; }
+.site-header nav a.active { color: var(--accent); }
+
+/* Main layout */
+main { padding: 2.7rem 0 3.6rem; }
+main section { margin: 0 0 2.5rem; }
+main section + section {
+  border-top: 1px solid var(--rule);
+  padding-top: 1.9rem;
+}
+
+h1 { font-size: 2.1rem; font-weight: 600; line-height: 1.15; margin: 0 0 .4rem; }
+h1 .cn { font-weight: 400; margin-left: .35rem; }
+h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 1rem; }
+h3 { font-size: 1.05rem; font-weight: 600; margin: 0 0 .3rem; }
+p { margin: 0 0 1rem; }
+
+/* Hero (home) */
+.hero { display: flex; gap: 2.2rem; align-items: flex-start; justify-content: space-between; }
+.hero-text { flex: 1 1 auto; }
+.headshot {
+  flex: none;
+  width: 168px;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(35, 33, 28, .2);
+}
+.role { font-size: 1.05rem; margin: .1rem 0 0; }
+.role .affil { color: var(--ink-soft); }
+.fields {
+  font-family: var(--sans);
+  font-size: .78rem;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 1rem 0 0;
+}
+@media (max-width: 640px) {
+  .hero { flex-direction: column-reverse; gap: 1.4rem; }
+  .headshot { width: 130px; }
+}
+
+/* Publications / papers */
+.pub { margin: 0 0 2rem; }
+.pub:last-child { margin-bottom: 0; }
+.pub-title { font-size: 1.08rem; line-height: 1.45; }
+.pub-title a { color: var(--ink); }
+.pub-title a:hover { color: var(--accent); }
+.pub-meta {
+  font-family: var(--sans);
+  font-size: .82rem;
+  color: var(--ink-soft);
+  margin: .15rem 0 .5rem;
+}
+.pub-meta a { color: inherit; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+.pub-meta a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+.pub-note { font-size: .95rem; margin: 0 0 .2rem; }
+.pub-links { font-family: var(--sans); font-size: .82rem; margin: .45rem 0 0; }
+.pub-links a { margin-right: .95rem; }
+
+/* Compact list (selected work on home) */
+.sel-list { list-style: none; padding: 0; margin: 0; }
+.sel-list li { margin: 0 0 1rem; }
+.sel-venue { display: block; font-family: var(--sans); font-size: .82rem; color: var(--ink-soft); }
+
+/* Contact + plain lists */
+.contact-list, .plain-list { list-style: none; padding: 0; margin: 0; }
+.contact-list li { margin: .4rem 0; }
+.contact-label {
+  display: inline-block;
+  min-width: 7rem;
+  font-family: var(--sans);
+  font-size: .75rem;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.plain-list li { margin: 0 0 .9rem; }
+.item-meta { display: block; font-family: var(--sans); font-size: .82rem; color: var(--ink-soft); }
+
+/* Footer */
+.site-footer {
+  border-top: 1px solid var(--rule);
+  padding: 1.4rem 0 2.4rem;
+  font-family: var(--sans);
+  font-size: .8rem;
+  color: var(--ink-soft);
+}
+.site-footer p { margin: 0; }
+.site-footer a { color: inherit; text-decoration: underline; text-decoration-color: var(--rule); }
+.site-footer a:hover { color: var(--accent); }
+
+/* Print */
+@media print {
+  body { background: #fff; }
+  .site-header nav, .site-footer { display: none; }
+  a { color: var(--ink); }
+}

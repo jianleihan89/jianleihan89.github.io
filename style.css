@@ -115,6 +115,8 @@ p { margin: 0 0 1rem; }
 }
 .pub-meta a { color: inherit; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
 .pub-meta a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+.sel-venue a { color: inherit; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+.sel-venue a:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .pub-note { font-size: .95rem; margin: 0 0 .2rem; }
 .pub-links { font-family: var(--sans); font-size: .82rem; margin: .45rem 0 0; }
 .pub-links a { margin-right: .95rem; }

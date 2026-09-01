@@ -159,3 +159,17 @@ p { margin: 0 0 1rem; }
   .site-header nav, .site-footer { display: none; }
   a { color: var(--ink); }
 }
+
+/* Button (CV download) */
+.btn {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: .85rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  background: var(--accent);
+  color: #fff;
+  padding: .62rem 1.15rem;
+  border-radius: 6px;
+}
+.btn:hover { background: var(--accent-deep); text-decoration: none; }

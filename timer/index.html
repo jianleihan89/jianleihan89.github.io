@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AFIN8020 Test Clock</title>
+<meta name="description" content="Countdown clock for the AFIN8020 in-class test at Macquarie University.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap">
+<style>
+  :root {
+    --bg: #F3F5F8;
+    --panel: #FFFFFF;
+    --ink: #1B2430;
+    --muted: #5E6B7A;
+    --line: #D6DCE4;
+    --accent: #8C1D40;
+    --slate: #3E5C76;
+    --amber: #B8860B;
+    --alarm: #8C1D40;
+    --alarm-bg: #FBE9EF;
+    --focus: #3E5C76;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1620; --panel: #16202C; --ink: #F3F5F8; --muted: #9AA7B5; --line: #2A3543;
+      --accent: #D4476F; --slate: #7FA3C3; --amber: #E0AC2A; --alarm: #FF6B8F; --alarm-bg: #3A1420; --focus: #7FA3C3;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1620; --panel: #16202C; --ink: #F3F5F8; --muted: #9AA7B5; --line: #2A3543;
+    --accent: #D4476F; --slate: #7FA3C3; --amber: #E0AC2A; --alarm: #FF6B8F; --alarm-bg: #3A1420; --focus: #7FA3C3;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    font-variant-numeric: tabular-nums; line-height: 1.3;
+    display: flex; flex-direction: column; min-height: 100vh;
+    transition: background 0.4s ease;
+  }
+  body.done { background: var(--alarm-bg); }
+  body.hide-cursor { cursor: none; }
+
+  header {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;
+    padding: 18px 28px 0;
+  }
+  .eyebrow { font-size: clamp(14px, 1.6vw, 22px); font-weight: 600; letter-spacing: 0.02em; color: var(--muted); }
+  .eyebrow strong { color: var(--ink); font-weight: 800; }
+  .wall { font-size: clamp(14px, 1.6vw, 22px); color: var(--muted); }
+  .wall b { color: var(--ink); font-weight: 600; }
+
+  main {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0 24px; text-align: center; gap: clamp(8px, 1.5vh, 20px);
+  }
+  .status {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: clamp(14px, 1.8vw, 24px); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  }
+  .status .dot { width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--line); }
+  .status.running .dot { background: var(--slate); }
+  .status.paused .dot { background: var(--amber); }
+  .status.done .dot { background: var(--alarm); }
+  .status.warn30 { color: var(--amber); }
+  .status.warn5, .status.done { color: var(--alarm); }
+
+  #digits {
+    font-weight: 800; line-height: 0.95; letter-spacing: -0.02em; margin: 0;
+    font-size: min(21vw, 42vh); white-space: nowrap;
+    color: var(--ink); transition: color 0.4s ease;
+  }
+  #digits.short { font-size: min(30vw, 50vh); }
+  #digits.warn30 { color: var(--amber); }
+  #digits.warn5 { color: var(--alarm); }
+  #digits.done { color: var(--alarm); animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+  @media (prefers-reduced-motion: reduce) { #digits.done { animation: none; } }
+
+  .caption { font-size: clamp(16px, 2.2vw, 30px); color: var(--muted); margin: 0; }
+  .caption b { color: var(--ink); font-weight: 600; }
+
+  .bar { width: min(92vw, 1400px); height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 0%; background: var(--slate); transition: width 0.5s linear; }
+  .bar.warn30 span { background: var(--amber); }
+  .bar.warn5 span, .bar.done span { background: var(--alarm); }
+
+  footer {
+    display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; justify-content: center;
+    padding: 14px 24px 22px; border-top: 1px solid var(--line); background: var(--panel);
+    transition: opacity 0.4s ease;
+  }
+  body.hide-cursor footer, body.hide-cursor header .hint { opacity: 0.08; }
+  .group { display: flex; align-items: center; gap: 8px; }
+  button {
+    font: inherit; font-weight: 600; font-size: 16px; color: var(--ink); background: var(--panel);
+    border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 18px; cursor: pointer;
+  }
+  button:hover { border-color: var(--slate); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #FFFFFF; padding: 10px 26px; font-size: 18px; }
+  button.primary:hover { filter: brightness(1.08); }
+  button[aria-pressed="true"] { background: var(--slate); border-color: var(--slate); color: #FFFFFF; }
+  label { font-size: 14px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  input[type="number"] {
+    font: inherit; font-variant-numeric: tabular-nums; width: 4.2em; padding: 8px 8px; color: var(--ink);
+    background: var(--panel); border: 1.5px solid var(--line); border-radius: 8px; text-align: right;
+  }
+  .hint { font-size: 13px; color: var(--muted); width: 100%; text-align: center; }
+  kbd { font: inherit; font-size: 12px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; color: var(--ink); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow"><strong>AFIN8020</strong> Credit and Lending Decisions · Mid-term test · Wednesday 16 September 2026</div>
+  <div class="wall">Now <b id="now">--:--</b> <span id="endsWrap" hidden>· Ends at <b id="ends">--:--</b></span></div>
+</header>
+
+<main>
+  <div class="status" id="status"><span class="dot"></span><span id="statusText">Ready · 2 hours</span></div>
+  <p id="digits">2:00:00</p>
+  <p class="caption" id="caption">Press <b>Start</b> when the test begins</p>
+  <div class="bar" id="bar"><span id="fill"></span></div>
+</main>
+
+<footer>
+  <div class="group">
+    <button class="primary" id="startBtn">Start</button>
+    <button id="resetBtn">Reset</button>
+  </div>
+  <div class="group" aria-label="Adjust remaining time">
+    <button id="minus1" title="Take one minute off">−1 min</button>
+    <button id="plus1" title="Add one minute">+1 min</button>
+    <button id="plus5" title="Add five minutes">+5 min</button>
+  </div>
+  <div class="group">
+    <label>Duration
+      <input type="number" id="hours" min="0" max="9" value="2" aria-label="hours"> h
+      <input type="number" id="minutes" min="0" max="59" value="0" aria-label="minutes"> min
+    </label>
+  </div>
+  <div class="group">
+    <button id="soundBtn" aria-pressed="true">Chime on</button>
+    <button id="themeBtn">Dark screen</button>
+    <button id="fsBtn">Full screen</button>
+  </div>
+  <div class="hint">Turns amber at 30 minutes and red at 5 minutes. Keys: <kbd>Space</kbd> start or pause · <kbd>R</kbd> reset · <kbd>F</kbd> full screen · <kbd>↑</kbd> <kbd>↓</kbd> add or take a minute. A refreshed page keeps counting.</div>
+</footer>
+
+<script>
+(function () {
+  var KEY = 'afin8020-test-clock';
+  var $ = function (id) { return document.getElementById(id); };
+  var digits = $('digits'), statusEl = $('status'), statusText = $('statusText'), caption = $('caption'),
+      bar = $('bar'), fill = $('fill'), nowEl = $('now'), endsEl = $('ends'), endsWrap = $('endsWrap'),
+      startBtn = $('startBtn'), resetBtn = $('resetBtn'), hoursIn = $('hours'), minutesIn = $('minutes'),
+      soundBtn = $('soundBtn'), themeBtn = $('themeBtn'), fsBtn = $('fsBtn');
+
+  var S = { state: 'idle', duration: 2 * 3600000, remaining: 2 * 3600000, endAt: 0, sound: true, theme: '' };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var s = JSON.parse(raw);
+      if (typeof s.duration === 'number' && s.duration > 0) S.duration = s.duration;
+      if (typeof s.sound === 'boolean') S.sound = s.sound;
+      if (s.theme === 'dark' || s.theme === 'light') S.theme = s.theme;
+      if (s.state === 'running' && typeof s.endAt === 'number') {
+        S.endAt = s.endAt; S.state = s.endAt > Date.now() ? 'running' : 'done';
+        S.remaining = Math.max(0, s.endAt - Date.now());
+      } else if (s.state === 'paused' && typeof s.remaining === 'number') {
+        S.state = 'paused'; S.remaining = Math.max(0, s.remaining);
+      } else {
+        S.remaining = S.duration;
+      }
+    } catch (e) { /* storage unavailable: run without it */ }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ }
+  }
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function fmt(ms) {
+    var t = Math.ceil(ms / 1000), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+    return h > 0 ? h + ':' + pad(m) + ':' + pad(s) : pad(m) + ':' + pad(s);
+  }
+  function clock(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function humanDuration(ms) {
+    var m = Math.round(ms / 60000), h = Math.floor(m / 60), r = m % 60;
+    if (h && r) return h + ' h ' + r + ' min';
+    if (h) return h + (h === 1 ? ' hour' : ' hours');
+    return r + ' min';
+  }
+
+  function remainingNow() {
+    return S.state === 'running' ? Math.max(0, S.endAt - Date.now()) : S.remaining;
+  }
+
+  function applyTheme() {
+    if (S.theme) document.documentElement.setAttribute('data-theme', S.theme);
+    else document.documentElement.removeAttribute('data-theme');
+    var dark = S.theme === 'dark' || (!S.theme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    themeBtn.textContent = dark ? 'Light screen' : 'Dark screen';
+  }
+
+  function render() {
+    var rem = remainingNow();
+    if (S.state === 'running' && rem <= 0) { finish(); return; }
+    nowEl.textContent = clock(new Date());
+    digits.textContent = fmt(rem);
+    digits.classList.toggle('short', rem < 3600000);
+    var warn5 = rem <= 5 * 60000 && S.state !== 'idle', warn30 = rem <= 30 * 60000 && S.state !== 'idle';
+    [digits, statusEl, bar].forEach(function (el) {
+      el.classList.toggle('done', S.state === 'done');
+      el.classList.toggle('warn5', S.state !== 'done' && warn5);
+      el.classList.toggle('warn30', S.state !== 'done' && warn30 && !warn5);
+      el.classList.toggle('running', S.state === 'running');
+      el.classList.toggle('paused', S.state === 'paused');
+    });
+    var elapsed = Math.min(1, Math.max(0, 1 - rem / S.duration));
+    fill.style.width = (elapsed * 100).toFixed(2) + '%';
+    if (S.state === 'idle') {
+      statusText.textContent = 'Ready · ' + humanDuration(S.duration);
+      caption.innerHTML = 'Press <b>Start</b> when the test begins';
+      endsWrap.hidden = true;
+      startBtn.textContent = 'Start';
+    } else if (S.state === 'running') {
+      statusText.textContent = warn5 ? 'Final minutes' : (warn30 ? 'Last half hour' : 'Test in progress');
+      caption.innerHTML = rem < 3600000 ? '<b>minutes</b> remaining' : '<b>hours : minutes : seconds</b> remaining';
+      endsEl.textContent = clock(new Date(S.endAt)); endsWrap.hidden = false;
+      startBtn.textContent = 'Pause';
+    } else if (S.state === 'paused') {
+      statusText.textContent = 'Paused';
+      caption.innerHTML = 'Clock stopped · press <b>Resume</b> to continue';
+      endsWrap.hidden = true;
+      startBtn.textContent = 'Resume';
+    } else {
+      statusText.textContent = 'Time is up';
+      digits.textContent = '0:00';
+      caption.innerHTML = '<b>Pens down.</b> Please stop writing and hand in your paper.';
+      endsWrap.hidden = true;
+      startBtn.textContent = 'Start';
+    }
+    document.body.classList.toggle('done', S.state === 'done');
+  }
+
+  function start() {
+    if (S.state === 'running') { pause(); return; }
+    if (S.state === 'idle' || S.state === 'done') { readDuration(); S.remaining = S.duration; }
+    S.endAt = Date.now() + S.remaining; S.state = 'running'; save(); render();
+  }
+  function pause() { S.remaining = remainingNow(); S.state = 'paused'; save(); render(); }
+  function reset() { readDuration(); S.state = 'idle'; S.remaining = S.duration; S.endAt = 0; save(); render(); }
+  function adjust(ms) {
+    if (S.state === 'running') { S.endAt = Math.max(Date.now(), S.endAt + ms); }
+    else if (S.state === 'done') { return; }
+    else { S.remaining = Math.max(0, S.remaining + ms); if (S.state === 'idle') { S.duration = S.remaining; writeDuration(); } }
+    save(); render();
+  }
+  function finish() { S.state = 'done'; S.remaining = 0; save(); render(); if (S.sound) chime(); }
+
+  function readDuration() {
+    var h = Math.max(0, Math.min(9, parseInt(hoursIn.value, 10) || 0));
+    var m = Math.max(0, Math.min(59, parseInt(minutesIn.value, 10) || 0));
+    var d = (h * 60 + m) * 60000;
+    S.duration = d > 0 ? d : 60000;
+    writeDuration();
+  }
+  function writeDuration() {
+    var mins = Math.round(S.duration / 60000);
+    hoursIn.value = Math.floor(mins / 60); minutesIn.value = mins % 60;
+  }
+
+  var audio;
+  function chime() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      var t = audio.currentTime;
+      [0, 0.35, 0.7, 1.4, 1.75, 2.1].forEach(function (off, i) {
+        var o = audio.createOscillator(), g = audio.createGain();
+        o.type = 'sine'; o.frequency.value = i % 3 === 2 ? 1046 : 784;
+        g.gain.setValueAtTime(0.0001, t + off); g.gain.exponentialRampToValueAtTime(0.5, t + off + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + off + 0.3);
+        o.connect(g); g.connect(audio.destination); o.start(t + off); o.stop(t + off + 0.32);
+      });
+    } catch (e) { /* no audio available */ }
+  }
+
+  startBtn.addEventListener('click', start);
+  resetBtn.addEventListener('click', reset);
+  $('minus1').addEventListener('click', function () { adjust(-60000); });
+  $('plus1').addEventListener('click', function () { adjust(60000); });
+  $('plus5').addEventListener('click', function () { adjust(5 * 60000); });
+  hoursIn.addEventListener('change', function () { if (S.state === 'idle') reset(); else readDuration(); });
+  minutesIn.addEventListener('change', function () { if (S.state === 'idle') reset(); else readDuration(); });
+  soundBtn.addEventListener('click', function () {
+    S.sound = !S.sound; soundBtn.setAttribute('aria-pressed', String(S.sound));
+    soundBtn.textContent = S.sound ? 'Chime on' : 'Chime off'; save(); if (S.sound) chime();
+  });
+  themeBtn.addEventListener('click', function () {
+    var dark = S.theme === 'dark' || (!S.theme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    S.theme = dark ? 'light' : 'dark'; applyTheme(); save();
+  });
+  fsBtn.addEventListener('click', function () {
+    var el = document.documentElement;
+    if (document.fullscreenElement) { document.exitFullscreen && document.exitFullscreen(); }
+    else if (el.requestFullscreen) { el.requestFullscreen(); }
+    else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+  });
+  document.addEventListener('fullscreenchange', function () { fsBtn.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; });
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space') { e.preventDefault(); start(); }
+    else if (e.key === 'r' || e.key === 'R') { reset(); }
+    else if (e.key === 'f' || e.key === 'F') { fsBtn.click(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); adjust(60000); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); adjust(-60000); }
+  });
+
+  var idleTimer;
+  function wake() {
+    document.body.classList.remove('hide-cursor');
+    clearTimeout(idleTimer);
+    if (document.fullscreenElement) idleTimer = setTimeout(function () { document.body.classList.add('hide-cursor'); }, 4000);
+  }
+  ['mousemove', 'keydown', 'click', 'touchstart'].forEach(function (ev) { document.addEventListener(ev, wake); });
+
+  load(); applyTheme(); writeDuration();
+  soundBtn.setAttribute('aria-pressed', String(S.sound)); soundBtn.textContent = S.sound ? 'Chime on' : 'Chime off';
+  render();
+  setInterval(render, 250);
+})();
+</script>
+
+</body>
+</html>

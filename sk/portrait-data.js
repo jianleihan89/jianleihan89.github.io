@@ -1,5 +1,17 @@
 'use strict';
 const PORTRAIT_STOPS=[-40,-20,0,20,50,100];
+// Equal slider distances between the six scenarios, retaining their CapEx values.
+function capexToPosition(value) {
+  const v=Math.max(PORTRAIT_STOPS[0],Math.min(PORTRAIT_STOPS.at(-1),value));
+  let interval=0;
+  while(interval<PORTRAIT_STOPS.length-2&&v>PORTRAIT_STOPS[interval+1])interval++;
+  return (interval+(v-PORTRAIT_STOPS[interval])/(PORTRAIT_STOPS[interval+1]-PORTRAIT_STOPS[interval]))*20;
+}
+function positionToCapex(position) {
+  const scaled=Math.max(0,Math.min(100,position))/20;
+  const interval=Math.min(PORTRAIT_STOPS.length-2,Math.floor(scaled));
+  return PORTRAIT_STOPS[interval]+(scaled-interval)*(PORTRAIT_STOPS[interval+1]-PORTRAIT_STOPS[interval]);
+}
 const PORTRAIT_ASSETS=[
   {src:'/sk/assets/chey-morph-sheet-v3.webp',columns:3,rows:2},
   {src:'/sk/assets/transitions/chey-01.webp',columns:2,rows:2},
